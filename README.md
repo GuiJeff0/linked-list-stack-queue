@@ -1,1 +1,1 @@
-# linked-list-stack-queue
+# Doubly linked list
