@@ -19,12 +19,16 @@ void popStack(ListNodePtr *topPtr);
 void printStack(ListNodePtr currentPtr);
 void freeQueue(ListNodePtr *headPtr);
 void freeStack(ListNodePtr *topPtr);
+void insertList(ListNodePtr *headPtr, ListNodePtr *backPtr, int info, int key);
+void deleteList(ListNodePtr *headPtr, ListNodePtr *backPtr, int key);
 
 
 int main(){
     ListNodePtr head = NULL;
     ListNodePtr tail = NULL;
     ListNodePtr top = NULL;
+    ListNodePtr listHead = NULL;
+    ListNodePtr listBack = NULL;
     int choose;
     int exit = 0;
     do{
@@ -84,16 +88,44 @@ int main(){
             }
             break;
         case 3:
-            int maneiraRandom;
-            maneiraRandom = rand() % 2;
-            if(maneiraRandom == 0){
+            int maneiraLista;
+            int valorLista;
+            int chaveLista;
+            int endLista = 0;
+            while (endLista != 1)
+            {   
+                
+                instructions();
+                scanf("%d", &maneiraLista);
+                if(maneiraLista == 1){
+                    printList(listHead);
+                    printf("Digite uma chave: ");
+                    scanf("%d", &chaveLista);
+                    printf("Digite um valor: ");
+                    scanf("%d", &valorLista);
+                    insertList(&listHead, &listBack, valorLista, chaveLista);
+                    printList(listHead);
+                } else if(maneiraLista == 2){
+                    printList(listHead);
+                    printf("Digite uma chave a ser deletada: ");
+                    scanf("%d", &chaveLista);
+                    deleteList(&listHead, &listBack, chaveLista);
+                    printList(listHead);
+                } else if(maneiraLista == 3){
+                    endLista = 1;
+                } else {
+                    printf("Escolha Invalida!\n");
+                }
                 
             }
+            
          break;
         
         default:
+            printf("Deletando...\n");
             freeQueue(&head);
             freeStack(&top);
+            freeQueue(&listHead);
             exit=1;
             break;
         }
@@ -112,7 +144,6 @@ void instructions(void){
     printf("3 -- Sair\n");
 }
 
-//insert into the list in the form of a queue
 void insertEnqueue(ListNodePtr *headPtr, ListNodePtr *tailPtr, int info){
     ListNodePtr newPtr;
     newPtr = malloc(sizeof(ListNode));
@@ -132,18 +163,22 @@ void insertEnqueue(ListNodePtr *headPtr, ListNodePtr *tailPtr, int info){
         }
 
     } else {
+        printf("memory allocation failure\n");
         return;
     }
 }
 
-//function to print list
 void printList(ListNodePtr currentPtr){
-
+    if(currentPtr == NULL){
+        printf("Empty list\n");
+    } else {
         while(currentPtr != NULL){
             printf("%d --> ", currentPtr->data);
             currentPtr = currentPtr->nextPtr;
         }
         printf("NULL\n\n");
+    }
+
 }
 
 void deleteEnqueue(ListNodePtr *headPtr, ListNodePtr *tailPtr){
@@ -187,6 +222,7 @@ void pushStack(ListNodePtr *topPtr, int info){
             *topPtr = newPtr;
         }
     }else {
+        printf("memory allocation failure\n");
         return;
     }
 }
@@ -240,4 +276,82 @@ void freeStack(ListNodePtr *topPtr){
     }
 
     *topPtr = NULL;
+}
+
+void insertList(ListNodePtr *headPtr, ListNodePtr *backPtr, int info, int key){
+    ListNodePtr newPtr;
+    ListNodePtr currentPtr;
+    newPtr = malloc(sizeof(ListNode));
+     
+     if(newPtr != NULL){
+        newPtr->data = info;
+        newPtr->nextPtr = NULL;
+        newPtr->previousPtr = NULL;
+
+        if(*headPtr == NULL && *backPtr == NULL){
+            *headPtr = newPtr;
+            *backPtr = newPtr;
+        } else {
+            currentPtr = *headPtr;
+            while(currentPtr != NULL && currentPtr->data != key){
+                currentPtr = currentPtr->nextPtr;
+            }
+
+            if(currentPtr != NULL){
+                newPtr->nextPtr = currentPtr->nextPtr;
+                if(currentPtr->nextPtr != NULL){
+                    currentPtr->nextPtr->previousPtr = newPtr;
+                }
+                newPtr->previousPtr = currentPtr;
+                currentPtr->nextPtr = newPtr;
+
+                if(newPtr->nextPtr == NULL){
+                    *backPtr = newPtr;
+                }
+            } else {
+                printf("The key was not found\n");
+            }
+        }
+     } else {
+        printf("memory allocation failure\n");
+        return;
+     }
+
+}
+
+void deleteList(ListNodePtr *headPtr, ListNodePtr *backPtr, int key){
+    ListNodePtr currentPtr, tempPtr;
+
+    if(*headPtr == NULL){
+        printf("Empty List\n");
+        return;
+    }
+
+    currentPtr = *headPtr;
+
+    while(currentPtr != NULL && currentPtr->data != key){
+        currentPtr = currentPtr->nextPtr;
+    }
+
+    if(currentPtr != NULL){
+        tempPtr = currentPtr;
+
+        if(currentPtr->previousPtr == NULL){
+            *headPtr = currentPtr->nextPtr;
+            if(*headPtr != NULL){
+                (*headPtr)->previousPtr = NULL;
+            }
+        } else {
+            currentPtr->previousPtr->nextPtr = currentPtr->nextPtr;
+            if(currentPtr->nextPtr != NULL){
+                currentPtr->nextPtr->previousPtr = currentPtr->previousPtr;
+            } else {
+                *backPtr = currentPtr->previousPtr;
+            }
+        }
+
+        free(tempPtr);
+    } else {
+        printf("The key was not found\n");
+    }
 }
